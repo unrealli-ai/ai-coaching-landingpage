@@ -1,7 +1,7 @@
 (function () {
   const SESSION_KEY = 'unrealli_ai_survival_session_id';
   const COACHING_URL = 'https://kmong.com/gig/759427';
-  const APPS_SCRIPT_WEB_APP_URL = "";
+  const APPS_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxGaEA5l7i-ux1cdW-vcIy8pfQwhqPOQfDtv4aA9pAY2K4CUGBawbUvJfhDpBwVvl5uEw/exec";
 
   const QUESTIONS = [
     ['q1', true, false, 'AI 도구를 업무에 얼마나 써봤나요?', '', [
