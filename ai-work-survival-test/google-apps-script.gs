@@ -27,7 +27,10 @@ var TEST_RESPONSE_HEADERS = [
   "q3_score",
   "q3_answer",
   "q4_score",
+  "q4_task_type",
   "q4_answer",
+  "q5_score",
+  "q5_answer",
   "q5_bottleneck",
   "q6_task_type",
   "q7_score",
@@ -50,6 +53,10 @@ var REPORT_REQUEST_HEADERS = [
   "nickname",
   "email",
   "report_task",
+  "q4_task_type",
+  "q4_answer",
+  "q5_score",
+  "q5_answer",
   "q5_bottleneck",
   "q6_task_type",
   "q8_needed_help",
@@ -77,11 +84,11 @@ function doPost(e) {
     var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
 
     if (payload.type === "test_response") {
-      var testSheet = getOrCreateSheet_(spreadsheet, TEST_RESPONSE_SHEET_NAME, TEST_RESPONSE_HEADERS);
-      appendPayload_(testSheet, TEST_RESPONSE_HEADERS, payload);
+      var testSheetData = getOrCreateSheet_(spreadsheet, TEST_RESPONSE_SHEET_NAME, TEST_RESPONSE_HEADERS);
+      appendPayload_(testSheetData.sheet, testSheetData.headers, payload);
     } else if (payload.type === "report_request") {
-      var reportSheet = getOrCreateSheet_(spreadsheet, REPORT_REQUEST_SHEET_NAME, REPORT_REQUEST_HEADERS);
-      appendPayload_(reportSheet, REPORT_REQUEST_HEADERS, payload);
+      var reportSheetData = getOrCreateSheet_(spreadsheet, REPORT_REQUEST_SHEET_NAME, REPORT_REQUEST_HEADERS);
+      appendPayload_(reportSheetData.sheet, reportSheetData.headers, payload);
     } else {
       throw new Error("Unknown payload type: " + payload.type);
     }
@@ -124,9 +131,31 @@ function getOrCreateSheet_(spreadsheet, sheetName, headers) {
   if (!hasHeaders) {
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
     sheet.setFrozenRows(1);
+    return {
+      sheet: sheet,
+      headers: headers
+    };
   }
 
-  return sheet;
+  var activeHeaders = firstRow.map(function (value) {
+    return String(value || "").trim();
+  }).filter(function (value) {
+    return value !== "";
+  });
+
+  var missingHeaders = headers.filter(function (header) {
+    return activeHeaders.indexOf(header) === -1;
+  });
+
+  if (missingHeaders.length > 0) {
+    sheet.getRange(1, activeHeaders.length + 1, 1, missingHeaders.length).setValues([missingHeaders]);
+    activeHeaders = activeHeaders.concat(missingHeaders);
+  }
+
+  return {
+    sheet: sheet,
+    headers: activeHeaders
+  };
 }
 
 function appendPayload_(sheet, headers, payload) {
