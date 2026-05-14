@@ -125,9 +125,9 @@
   ];
 
   const BEFORE_AFTER = [
-    ['매주 여러 파일을 열고 복붙', 'AI와 시트 구조로 취합 기준 정리'],
-    ['보고서 초안 쓸 때마다 빈 문서 앞에서 멈춤', '내 자료를 넣고 AI로 초안 생성 후 검수'],
-    ['숫자나 내용이 맞는지 눈으로 확인', '검수 기준을 정리해 오류 후보 먼저 찾기'],
+    ['여러 파일 복붙', '한 번에 모아 정리'],
+    ['보고서 빈 문서', 'AI 초안 만들기'],
+    ['눈으로 검수', '오류 후보 먼저 찾기'],
   ];
 
   const SPRITES = {
@@ -301,7 +301,6 @@
         <div class="hero-copy">
           <h1><span class="title-line">AI는 다들 쓴다는데,</span><span class="title-line">내 업무는 왜 그대로일까요?</span></h1>
           <p class="lead">5문항으로 확인하는<br>내 AI 업무 생존력 레벨</p>
-          <button class="btn-pixel hero-cta" data-action="start" data-event="start_test_click">내 레벨 확인하기 →</button>
         </div>
         <div class="hero-scene image-scene pixel-card mint">
           <picture>
@@ -309,13 +308,8 @@
             <img class="character-main-image" src="assets/hero-pc.png" alt="외계인 직장인과 AI 도우미가 함께 업무를 보는 장면">
           </picture>
         </div>
+        <button class="btn-pixel hero-cta" data-action="start" data-event="start_test_click">내 레벨 확인하기 →</button>
       </section>
-      <section class="benefit-row ad-benefits" aria-label="테스트 특징">
-        <article class="mini-card mint"><b>01</b><strong>5문항</strong><span>복잡한 설명 없이 지금 상태만 빠르게 확인해요.</span></article>
-        <article class="mini-card lav"><b>02</b><strong>30초 흐름</strong><span>선택하면 바로 다음 질문으로 넘어가요.</span></article>
-        <article class="mini-card peach"><b>03</b><strong>내 업무 기준</strong><span>줄이고 싶은 반복 업무에 맞춰 결과를 보여줘요.</span></article>
-      </section>
-      <div class="bottom-cta"><button class="btn-pixel" data-action="start" data-event="start_test_click">테스트 시작하기 →</button></div>
     `);
   }
 
@@ -329,10 +323,9 @@
         <div class="question-body">
           <div class="eyebrow">QUESTION ${String(state.index + 1).padStart(2, '0')}</div>
           <h2>${escapeHtml(q.title)}</h2>
-          <div class="helper-card compact-helper">${sprite('robot', 2.2)}<p>가장 가까운 답변을 누르면 바로 다음으로 넘어가요.</p></div>
           <div class="choice-list">${q.options.map((option, index) => {
             const active = answerText(selected) === option.label;
-            return `<button class="choice ${active ? 'selected' : ''}" data-action="select" data-index="${index}" data-event="question_${state.index + 1}_answered"><span class="num">${String.fromCharCode(65 + index)}</span><span>${escapeHtml(option.label)}</span>${active ? `<span class="choice-check">${sprite('check', 1.4)}</span>` : ''}</button>`;
+            return `<button class="choice ${active ? 'selected' : ''}" data-action="select" data-index="${index}" data-event="question_${state.index + 1}_answered"><span class="num">${String.fromCharCode(65 + index)}</span><span class="choice-text">${escapeHtml(option.label)}</span>${active ? '<span class="choice-check" aria-hidden="true"></span>' : ''}</button>`;
           }).join('')}</div>
         </div>
       </section>
@@ -344,12 +337,8 @@
   }
 
   function renderBeforeAfter() {
-    return `<section class="before-after-section"><h3>내 업무도 이렇게 바뀔 수 있어요</h3><div class="before-after-grid">${BEFORE_AFTER.map((pair) => `
-      <article class="ba-card">
-        <div><span>Before</span><p>${escapeHtml(pair[0])}</p></div>
-        <b>→</b>
-        <div><span>After</span><p>${escapeHtml(pair[1])}</p></div>
-      </article>
+    return `<section class="before-after-section"><h3>반복 업무, 이렇게 줄일 수 있어요</h3><div class="before-after-box">${BEFORE_AFTER.map((pair) => `
+      <div class="ba-row"><span>${escapeHtml(pair[0])}</span><b>→</b><strong>${escapeHtml(pair[1])}</strong></div>
     `).join('')}</div></section>`;
   }
 
