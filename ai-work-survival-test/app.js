@@ -133,6 +133,29 @@
     ],
   };
 
+  const RESULT_CARD_META = {
+    1: {
+      skill: '검색 / 구경 / 가끔 질문',
+      next: '반복 업무 하나를 AI에게 물어보기',
+    },
+    2: {
+      skill: '질문하기 / 답변 복사',
+      next: '내 상황과 원하는 형식을 같이 말하기',
+    },
+    3: {
+      skill: '초안 생성 / 요약 / 정리',
+      next: '반복 질문 템플릿 1개 만들기',
+    },
+    4: {
+      skill: '자료 입력 / 결과 수정 / 반복 활용',
+      next: '업무별 프롬프트와 검수 기준 정리',
+    },
+    5: {
+      skill: '업무 구조화 / 반복 프로세스 설계',
+      next: '시트, 문서, 자동화를 하나의 흐름으로 연결',
+    },
+  };
+
   const BEFORE_AFTER_BY_LEVEL = {
     1: {
       title: 'AI에게 맡길 수 있는 일부터 찾아보세요',
@@ -389,29 +412,47 @@
     `).join('')}</div></section>`;
   }
 
+  function renderCheatCode() {
+    return `<details class="cheat-card">
+      <summary>🎁 오늘의 AI 치트코드 보기</summary>
+      <div class="cheat-content">
+        <p>내가 반복하는 업무는 [업무명]이야.<br>입력 자료는 [자료]이고,<br>원하는 결과물은 [결과물 형식]이야.</p>
+        <p>이 업무를 AI로 줄이려면</p>
+        <ol>
+          <li>어떤 순서로 맡기면 좋을지</li>
+          <li>어떤 프롬프트를 쓰면 좋을지</li>
+          <li>내가 검수해야 할 부분은 뭔지</li>
+        </ol>
+        <p>정리해줘.</p>
+      </div>
+    </details>`;
+  }
+
   function renderResult() {
     const payload = state.resultPayload;
     const result = resultByScore(payload.total_score);
+    const cardMeta = RESULT_CARD_META[result.level] || RESULT_CARD_META[1];
     root.innerHTML = shell(`
       <section class="result-layout result-focused" id="preview-result" data-event="result_viewed">
         <div class="result-main pixel-card">
-          <div class="result-hero compact-result">
-            <div>
-              <div class="eyebrow">YOUR LEVEL · 5/5 완료</div>
+          <div class="survival-card">
+            <div class="survival-card-copy">
+              <div class="eyebrow">AI 업무 생존력 카드</div>
               <div class="lvl-num">LV.${String(result.level).padStart(2, '0')}</div>
               <h2>${escapeHtml(result.title)}</h2>
-              <p>${escapeHtml(result.verdict)}</p>
+              <p class="card-verdict">${escapeHtml(result.verdict)}</p>
+              <div class="card-stats">
+                <div><span>현재 스킬</span><strong>${escapeHtml(cardMeta.skill)}</strong></div>
+                <div><span>다음 레벨 조건</span><strong>${escapeHtml(cardMeta.next)}</strong></div>
+              </div>
             </div>
-            <div class="result-character image-character"><img src="assets/level-${result.level}-character.png" alt="LV.${String(result.level).padStart(2, '0')} ${escapeHtml(result.title)} 캐릭터"></div>
+            <div class="card-character"><img src="assets/result-card-level-${result.level}.png" alt="LV.${String(result.level).padStart(2, '0')} ${escapeHtml(result.title)} 결과 카드 이미지"></div>
           </div>
-          <div class="result-summary-grid">
-            ${resultCard('lav', '지금 막히는 핵심', result.blocker)}
-            ${resultCard('peach', '추천 다음 단계', result.next)}
-          </div>
+          <p class="capture-note">📸 이 카드는 캡처해두세요</p>
           <div class="result-cta-panel">
-            <p>결과가 나왔다면, 이제 내 실제 업무에 적용해볼 차례입니다.</p>
             <a class="btn-pixel cta-full result-primary-cta" href="${COACHING_URL}" target="_blank" rel="noopener noreferrer" data-event="kmong_cta_clicked">내 AI 업무 스킬 레벨업하기 →</a>
           </div>
+          ${renderCheatCode()}
           ${renderBeforeAfter(result)}
           <div class="report-soft-area">
             <button class="report-card" data-action="report" data-event="report_form_opened"><span class="report-icon">R</span><span><strong>2페이지 맞춤 리포트 후보로 신청하기</strong><small>선택한 업무 기준으로 일부 분께만 개별 안내</small></span><b>+</b></button>
