@@ -124,11 +124,57 @@
     },
   ];
 
-  const BEFORE_AFTER = [
-    ['여러 파일 복붙', '한 번에 모아 정리'],
-    ['보고서 빈 문서', 'AI 초안 만들기'],
-    ['눈으로 검수', '오류 후보 먼저 찾기'],
-  ];
+  const DEFAULT_BEFORE_AFTER = {
+    title: '반복 업무, 이렇게 줄일 수 있어요',
+    items: [
+      ['여러 파일 복붙', '한 번에 모아 정리'],
+      ['보고서 빈 문서', 'AI 초안 만들기'],
+      ['눈으로 검수', '오류 후보 먼저 찾기'],
+    ],
+  };
+
+  const BEFORE_AFTER_BY_LEVEL = {
+    1: {
+      title: 'AI에게 맡길 수 있는 일부터 찾아보세요',
+      items: [
+        ['어디에 쓸지 모름', '반복 업무부터 찾기'],
+        ['검색만 하다 끝남', '내 업무 질문해보기'],
+        ['혼자 다 처리함', 'AI에게 초안 맡기기'],
+      ],
+    },
+    2: {
+      title: '복붙에서 벗어나, 내 업무에 맞게 바꿔보세요',
+      items: [
+        ['답변만 복붙', '내 상황에 맞게 수정'],
+        ['질문이 매번 달라짐', '자주 쓰는 질문 저장'],
+        ['결과가 애매함', '원하는 형식까지 요청'],
+      ],
+    },
+    3: {
+      title: '이제 반복해서 쓸 수 있는 방식으로 정리해보세요',
+      items: [
+        ['매번 새로 질문', '업무별 프롬프트 만들기'],
+        ['초안만 받고 끝', '검수 기준까지 추가'],
+        ['파일 정리가 어려움', '자료 넣는 방식 정리'],
+      ],
+    },
+    4: {
+      title: '잘 쓰고 있습니다. 이제 흐름으로 묶을 차례예요',
+      items: [
+        ['작업마다 따로 AI 사용', '반복 흐름으로 연결'],
+        ['결과물마다 품질 차이', '기준 문서로 품질 고정'],
+        ['혼자만 잘 씀', '팀도 쓸 수 있게 정리'],
+      ],
+    },
+    5: {
+      title: '이미 잘하고 있습니다. 이제 자동화 구조로 확장해보세요',
+      items: [
+        ['AI를 개별 작업에 사용', '업무 흐름 전체로 설계'],
+        ['사람이 매번 실행', '버튼·시트·자동화로 연결'],
+        ['나만 아는 방식', '팀 운영 시스템으로 정리'],
+      ],
+    },
+  };
 
   const SPRITES = {
     robot: [
@@ -299,8 +345,8 @@
     root.innerHTML = shell(`
       <section class="hero-layout hero-ad">
         <div class="hero-copy">
-          <h1><span class="title-line">AI는 다들 쓴다는데,</span><span class="title-line">내 업무는 왜 그대로일까요?</span></h1>
-          <p class="lead">5문항으로 확인하는<br>내 AI 업무 생존력 레벨</p>
+          <h1><span class="title-line"><span class="text-accent">AI</span>는 다들 쓴다는데,</span><span class="title-line">내 업무는 왜 <span class="text-peach">그대로</span>일까요?</span></h1>
+          <p class="lead"><span class="sub-accent">5문항</span>으로 확인하는<br>내 AI 업무 생존력 레벨</p>
         </div>
         <div class="hero-scene image-scene pixel-card mint">
           <picture>
@@ -336,8 +382,9 @@
     return `<article class="diag ${tone}"><h3>${title}</h3><ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul></article>`;
   }
 
-  function renderBeforeAfter() {
-    return `<section class="before-after-section"><h3>반복 업무, 이렇게 줄일 수 있어요</h3><div class="before-after-box">${BEFORE_AFTER.map((pair) => `
+  function renderBeforeAfter(result) {
+    const data = BEFORE_AFTER_BY_LEVEL[result.level] || DEFAULT_BEFORE_AFTER;
+    return `<section class="before-after-section"><h3>${escapeHtml(data.title)}</h3><div class="before-after-box">${data.items.map((pair) => `
       <div class="ba-row"><span>${escapeHtml(pair[0])}</span><b>→</b><strong>${escapeHtml(pair[1])}</strong></div>
     `).join('')}</div></section>`;
   }
@@ -365,7 +412,7 @@
             <p>결과가 나왔다면, 이제 내 실제 업무에 적용해볼 차례입니다.</p>
             <a class="btn-pixel cta-full result-primary-cta" href="${COACHING_URL}" target="_blank" rel="noopener noreferrer" data-event="kmong_cta_clicked">내 AI 업무 스킬 레벨업하기 →</a>
           </div>
-          ${renderBeforeAfter()}
+          ${renderBeforeAfter(result)}
           <div class="report-soft-area">
             <button class="report-card" data-action="report" data-event="report_form_opened"><span class="report-icon">R</span><span><strong>2페이지 맞춤 리포트 후보로 신청하기</strong><small>선택한 업무 기준으로 일부 분께만 개별 안내</small></span><b>+</b></button>
             <button class="btn-pixel ghost cta-full" data-action="restart">다시 풀기</button>
