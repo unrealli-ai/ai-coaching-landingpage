@@ -176,6 +176,144 @@
     },
   };
 
+  const CHEAT_CODES_BY_LEVEL = {
+    1: {
+      title: 'AI에게 맡길 업무 찾기',
+      guide: 'AI를 어디에 써야 할지 모르겠다면, 먼저 “내 반복 업무 찾기”부터 시작하세요.',
+      prompt: `내가 하는 업무 중 반복되는 일을 찾고 싶어.
+
+내 업무는 [하는 일/직무]이고,
+평소에 자주 하는 일은 아래와 같아.
+
+1. [자주 하는 일 1]
+2. [자주 하는 일 2]
+3. [자주 하는 일 3]
+
+이 중에서 AI에게 먼저 맡겨볼 만한 일을
+쉬운 순서대로 3개 골라줘.
+
+각 업무마다
+- AI에게 맡길 수 있는 부분
+- 내가 직접 확인해야 하는 부분
+- 처음 시도할 때 쓸 질문 예시
+를 쉽게 정리해줘.`,
+    },
+    2: {
+      title: '복붙 탈출 프롬프트',
+      guide: '복붙에서 벗어나려면 “내 상황”과 “원하는 결과 형식”을 같이 말해야 합니다.',
+      prompt: `아래 업무에 AI를 활용하려고 해.
+
+업무 내용:
+[업무 설명]
+
+내 상황:
+[업종/직무/대상/목적]
+
+원하는 결과물:
+[예: 보고서 초안, 메일 답변, 표 정리, 체크리스트, 요약문]
+
+조건:
+- 너무 일반적인 답변 말고 내 상황에 맞게 작성해줘.
+- 바로 복사해서 쓸 수 있게 구체적으로 써줘.
+- 결과물은 [원하는 형식]으로 정리해줘.
+- 마지막에 내가 확인해야 할 부분 3개도 알려줘.
+
+먼저 초안을 만들어줘.`,
+    },
+    3: {
+      title: '재사용 프롬프트 템플릿',
+      guide: '이 단계부터는 “잘 묻기”가 아니라 “다시 쓸 수 있게 만들기”가 핵심입니다.',
+      prompt: `나는 아래 업무를 반복해서 하고 있어.
+
+반복 업무:
+[업무명]
+
+이 업무를 할 때 매번 들어가는 정보:
+- 입력 자료: [예: 회의 메모, 엑셀 데이터, 고객 메시지, 조사 자료]
+- 원하는 결과물: [예: 요약문, 보고서 초안, 답변문, 표]
+- 지켜야 할 기준: [예: 말투, 분량, 형식, 검수 기준]
+
+이 업무에 반복해서 쓸 수 있는
+프롬프트 템플릿을 만들어줘.
+
+템플릿에는 아래 항목을 포함해줘.
+1. 역할 설정
+2. 입력값 넣는 자리
+3. 작업 조건
+4. 결과물 형식
+5. 내가 검수해야 할 체크포인트
+
+그리고 내가 매번 바꿔 넣으면 되는 부분은
+[대괄호]로 표시해줘.`,
+    },
+    4: {
+      title: '업무 레시피 만들기',
+      guide: '프롬프트를 잘 쓰는 것보다 중요한 건, 반복 업무를 “레시피”로 만드는 겁니다.',
+      prompt: `아래 반복 업무를 매번 같은 방식으로 처리할 수 있는
+업무 템플릿으로 만들고 싶어.
+
+반복 업무:
+[업무명]
+
+현재 처리 방식:
+[지금 사람이 하는 순서]
+
+사용하는 자료:
+[예: 엑셀 파일, 구글시트, 회의록, 이메일, 문서, 이미지]
+
+원하는 결과물:
+[예: 정리표, 보고서, 답변 초안, 검수 결과, 요약본]
+
+이 업무를 입력값만 바꾸면 재사용할 수 있도록
+업무 레시피로 정리해줘.
+
+아래 형식으로 작성해줘.
+
+1. 필요한 입력값
+2. 처리 순서
+3. AI에게 맡길 부분
+4. 사람이 검수할 부분
+5. 결과물 형식
+6. 다음에 그대로 복붙해서 쓸 프롬프트 템플릿
+7. 엑셀/구글시트/문서와 연결하면 더 줄일 수 있는 부분`,
+    },
+    5: {
+      title: '워크플로우 설계 프롬프트',
+      guide: '이 단계에서는 프롬프트보다 “업무 흐름 설계”가 핵심입니다.',
+      prompt: `아래 업무를 AI와 자동화 도구를 활용한
+반복 가능한 워크플로우로 설계하고 싶어.
+
+업무 목표:
+[최종적으로 만들고 싶은 결과]
+
+현재 업무 흐름:
+1. [현재 단계 1]
+2. [현재 단계 2]
+3. [현재 단계 3]
+4. [현재 단계 4]
+
+사용하는 도구:
+[예: 엑셀, 구글시트, 구글문서, 슬라이드, 이메일, 노션, ChatGPT, Claude, Gemini]
+
+반복되는 병목:
+[시간이 오래 걸리거나 실수가 자주 나는 부분]
+
+아래 기준으로 워크플로우를 설계해줘.
+
+1. 입력 데이터는 무엇인지
+2. AI가 처리할 수 있는 단계는 어디인지
+3. 사람이 검수해야 하는 단계는 어디인지
+4. 자동화 도구로 연결할 수 있는 단계는 어디인지
+5. 최종 결과물은 어떤 형식으로 나와야 하는지
+6. 최소 버전으로 먼저 만들 MVP 구조
+7. 나중에 고도화할 수 있는 자동화 구조
+
+마지막에는
+“지금 당장 만들 1단계 버전”과
+“나중에 확장할 2단계 버전”을 나눠서 제안해줘.`,
+    },
+  };
+
   const SPRITES = {
     robot: [
       '.....kkkk.....', '......kk......', '...kkkkkkkk...', '..klllllllkk..', '.kltwwwttwwlk.',
@@ -219,6 +357,23 @@
     if (window.posthog && typeof window.posthog.capture === 'function') {
       window.posthog.capture(eventName, properties || {});
     }
+  }
+
+  async function copyText(value) {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(value);
+      return;
+    }
+
+    const textarea = document.createElement('textarea');
+    textarea.value = value;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    textarea.remove();
   }
 
   async function sendToGoogleSheets(payload) {
@@ -389,18 +544,21 @@
     `).join('')}</div></section>`;
   }
 
-  function renderCheatCode() {
+  function getCheatCode(result) {
+    return CHEAT_CODES_BY_LEVEL[result?.level] || CHEAT_CODES_BY_LEVEL[3];
+  }
+
+  function renderCheatCode(result) {
+    const cheatCode = getCheatCode(result);
     return `<details class="cheat-card">
       <summary>🎁 오늘의 AI 치트코드 보기</summary>
       <div class="cheat-content">
-        <p>내가 반복하는 업무는 [업무명]이야.<br>입력 자료는 [자료]이고,<br>원하는 결과물은 [결과물 형식]이야.</p>
-        <p>이 업무를 AI로 줄이려면</p>
-        <ol>
-          <li>어떤 순서로 맡기면 좋을지</li>
-          <li>어떤 프롬프트를 쓰면 좋을지</li>
-          <li>내가 검수해야 할 부분은 뭔지</li>
-        </ol>
-        <p>정리해줘.</p>
+        <div class="cheat-heading">
+          <strong>${escapeHtml(cheatCode.title)}</strong>
+          <p>${escapeHtml(cheatCode.guide)}</p>
+        </div>
+        <pre class="cheat-prompt">${escapeHtml(cheatCode.prompt)}</pre>
+        <button class="copy-cheat-button" type="button" data-action="copy-cheat" data-event="cheat_code_copied">치트코드 복사하기</button>
       </div>
     </details>`;
   }
@@ -433,7 +591,7 @@
           <div class="result-cta-panel">
             <a class="btn-pixel cta-full result-primary-cta" href="${COACHING_URL}" target="_blank" rel="noopener noreferrer" data-event="kmong_cta_clicked">내 AI 업무 스킬 레벨업하기 →</a>
           </div>
-          ${renderCheatCode()}
+          ${renderCheatCode(result)}
           ${renderBeforeAfter(result)}
           <div class="report-soft-area">
             <button class="btn-pixel ghost cta-full" data-action="restart">다시 풀기</button>
@@ -521,7 +679,7 @@
     renderReport(true, {});
   });
 
-  root.addEventListener('click', (event) => {
+  root.addEventListener('click', async (event) => {
     const target = event.target.closest('[data-action]');
     if (!target) return;
     const action = target.dataset.action;
@@ -533,6 +691,19 @@
     if (action === 'start') {
       state.view = 'question';
       state.index = 0;
+    }
+
+    if (action === 'copy-cheat') {
+      const result = state.resultPayload ? resultByScore(state.resultPayload.total_score) : null;
+      const cheatCode = getCheatCode(result);
+      try {
+        await copyText(cheatCode.prompt);
+        target.textContent = '복사 완료';
+        target.disabled = true;
+      } catch (error) {
+        console.error('Failed to copy cheat code:', error);
+      }
+      return;
     }
 
     if (action === 'select') {

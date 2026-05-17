@@ -964,13 +964,58 @@ a {
   line-height: 1.55;
 }
 
-.cheat-content p {
-  margin: 10px 0;
+.cheat-heading {
+  display: grid;
+  gap: 6px;
+  margin: 4px 0 10px;
 }
 
-.cheat-content ol {
-  margin: 8px 0;
-  padding-left: 22px;
+.cheat-heading strong {
+  color: var(--navy);
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.cheat-heading p {
+  margin: 0;
+  color: var(--navy-soft);
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.cheat-prompt {
+  max-height: 300px;
+  margin: 12px 0;
+  padding: 13px;
+  overflow: auto;
+  border: 1.5px solid rgba(13, 21, 48, 0.24);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--navy-2);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.copy-cheat-button {
+  width: 100%;
+  min-height: 44px;
+  border: 2px solid var(--navy);
+  border-radius: 10px;
+  background: var(--mint-soft);
+  color: var(--navy);
+  box-shadow: 3px 3px 0 var(--mint-strong);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.copy-cheat-button:disabled {
+  cursor: default;
+  background: var(--mint);
 }
 
 .before-after-section {
