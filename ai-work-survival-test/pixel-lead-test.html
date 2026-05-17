@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Meta Lead Test · Unrealli</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #f6f1e8;
+      color: #1f2933;
+      font-family: Arial, sans-serif;
+    }
+
+    main {
+      width: min(92vw, 520px);
+      padding: 28px;
+      border: 2px solid #1f2933;
+      background: #ffffff;
+      box-shadow: 8px 8px 0 #1f2933;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 28px;
+      line-height: 1.2;
+    }
+
+    p {
+      margin: 0 0 20px;
+      line-height: 1.6;
+    }
+
+    button {
+      width: 100%;
+      min-height: 52px;
+      border: 2px solid #1f2933;
+      background: #7ee6b8;
+      color: #1f2933;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 700;
+      box-shadow: 4px 4px 0 #1f2933;
+    }
+
+    button:disabled {
+      cursor: default;
+      opacity: 0.7;
+    }
+
+    .status {
+      margin-top: 16px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+  </style>
+  <script>
+    window.META_PIXEL_ID = "2211846416311327";
+    !function (f, b, e, v, n, t, s) {
+      if (f.fbq) return;
+      n = f.fbq = function () {
+        n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+      };
+      if (!f._fbq) f._fbq = n;
+      n.push = n;
+      n.loaded = true;
+      n.version = "2.0";
+      n.queue = [];
+      t = b.createElement(e);
+      t.async = true;
+      t.src = v;
+      s = b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t, s);
+    }(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
+    fbq("init", window.META_PIXEL_ID);
+    fbq("track", "PageView");
+
+    function fireLead() {
+      var button = document.querySelector("[data-fire-lead]");
+      var status = document.querySelector("[data-status]");
+      if (button.disabled) return;
+      button.disabled = true;
+      fbq("track", "Lead");
+
+      var fallback = new Image();
+      fallback.width = 1;
+      fallback.height = 1;
+      fallback.alt = "";
+      fallback.style.display = "none";
+      fallback.src = "https://www.facebook.com/tr?id=2211846416311327&ev=Lead&noscript=1";
+      document.body.appendChild(fallback);
+
+      status.textContent = "Lead test event fired.";
+    }
+  </script>
+</head>
+<body>
+  <main>
+    <h1>Meta Lead Test</h1>
+    <p>This hidden test page is only for verifying the Meta Pixel Lead event before ads. It is not linked from the landing page.</p>
+    <button type="button" data-fire-lead onclick="fireLead()">Fire Lead Test Event</button>
+    <div class="status" data-status>Ready.</div>
+  </main>
+</body>
+</html>
