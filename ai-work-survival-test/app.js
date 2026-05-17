@@ -745,7 +745,6 @@
           ${renderCheatCode(result)}
           ${renderBeforeAfter(result)}
           <div class="report-soft-area">
-            <button class="btn-pixel ghost cta-full" data-action="report" data-event="report_form_opened">맞춤 리포트 신청하기</button>
             <button class="btn-pixel ghost cta-full" data-action="restart">다시 풀기</button>
           </div>
         </div>
