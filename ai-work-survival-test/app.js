@@ -1,7 +1,14 @@
 (function () {
   const SESSION_KEY = 'unrealli_ai_survival_session_id';
+  const META_LEAD_SESSION_KEY = 'unrealli_ai_survival_meta_lead_tracked';
   const COACHING_URL = 'https://kmong.com/gig/759427';
   const APPS_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxGaEA5l7i-ux1cdW-vcIy8pfQwhqPOQfDtv4aA9pAY2K4CUGBawbUvJfhDpBwVvl5uEw/exec";
+  const META_PIXEL_ID = window.META_PIXEL_ID || "YOUR_META_PIXEL_ID";
+  const TRACKED_EVENT_LOGS = new Set(["start_test_click", "result_viewed", "kmong_cta_clicked"]);
+  const DEBUG_TRACKING = (() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("debug_tracking") === "1" || window.location.hostname === "localhost" || window.location.protocol === "file:";
+  })();
 
   const QUESTIONS = [
     {
@@ -332,9 +339,12 @@
     l: '#D9D3FF',
   };
 
+  const initialAttribution = getAttribution();
+
   const state = {
     sessionId: getSessionId(),
-    source: getSource(),
+    attribution: initialAttribution,
+    source: initialAttribution.source,
     view: 'hero',
     index: 0,
     answers: {},
@@ -353,9 +363,155 @@
     return `id_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
   }
 
+  function debugLog() {
+    if (!DEBUG_TRACKING) return;
+    console.log.apply(console, arguments);
+  }
+
   function captureEvent(eventName, properties) {
     if (window.posthog && typeof window.posthog.capture === 'function') {
       window.posthog.capture(eventName, properties || {});
+    }
+  }
+
+  function isMetaPixelConfigured() {
+    return Boolean(META_PIXEL_ID && META_PIXEL_ID !== "YOUR_META_PIXEL_ID");
+  }
+
+  function loadMetaPixel() {
+    if (!isMetaPixelConfigured()) {
+      debugLog("[Meta Pixel] skipped: placeholder Pixel ID");
+      return;
+    }
+
+    if (window.fbq) return;
+
+    !function (f, b, e, v, n, t, s) {
+      if (f.fbq) return;
+      n = f.fbq = function () {
+        n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+      };
+      if (!f._fbq) f._fbq = n;
+      n.push = n;
+      n.loaded = true;
+      n.version = "2.0";
+      n.queue = [];
+      t = b.createElement(e);
+      t.async = true;
+      t.src = v;
+      s = b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t, s);
+    }(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
+
+    window.fbq("init", META_PIXEL_ID);
+  }
+
+  function trackMetaEvent(eventName, properties) {
+    if (!isMetaPixelConfigured() || typeof window.fbq !== "function") {
+      debugLog(`[Meta Pixel] ${eventName} skipped: Pixel ID not configured`);
+      return false;
+    }
+
+    window.fbq("track", eventName, properties || {});
+    debugLog(`[Meta Pixel] ${eventName} tracked`, properties || {});
+    return true;
+  }
+
+  function getAttribution() {
+    const params = new URLSearchParams(window.location.search);
+    const source = params.get("source") || params.get("utm_source") || "direct";
+    return {
+      source,
+      campaign: params.get("campaign") || params.get("utm_campaign") || "",
+      adset: params.get("adset") || "",
+      ad: params.get("ad") || "",
+      creative: params.get("creative") || "",
+    };
+  }
+
+  function attributionProperties() {
+    return {
+      source: state.attribution.source,
+      campaign: state.attribution.campaign,
+      adset: state.attribution.adset,
+      ad: state.attribution.ad,
+      creative: state.attribution.creative,
+    };
+  }
+
+  function sendTrackingPayload(payload) {
+    if (!APPS_SCRIPT_WEB_APP_URL) return;
+    const body = JSON.stringify(payload);
+
+    try {
+      if (navigator.sendBeacon) {
+        const sent = navigator.sendBeacon(APPS_SCRIPT_WEB_APP_URL, new Blob([body], { type: "text/plain;charset=UTF-8" }));
+        if (sent) return;
+      }
+    } catch (error) {
+      debugLog("[Tracking] sendBeacon failed", error);
+    }
+
+    try {
+      fetch(APPS_SCRIPT_WEB_APP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        keepalive: true,
+        body,
+      });
+    } catch (error) {
+      debugLog("[Tracking] event log failed", error);
+    }
+  }
+
+  function sendEventLog(eventName, properties) {
+    if (!TRACKED_EVENT_LOGS.has(eventName)) return;
+
+    const resultPayload = state.resultPayload || {};
+    sendTrackingPayload({
+      type: "event_log",
+      logged_at: new Date().toISOString(),
+      session_id: state.sessionId,
+      attempt_id: resultPayload.attempt_id || "",
+      event_name: eventName,
+      ...attributionProperties(),
+      result_level: resultPayload.result_level || properties?.result_level || "",
+      result_title: resultPayload.result_title || properties?.result_title || "",
+      total_score: resultPayload.total_score || properties?.total_score || "",
+      properties: properties || {},
+      user_agent: navigator.userAgent,
+    });
+  }
+
+  function trackEvent(eventName, properties = {}, options = {}) {
+    const mergedProperties = {
+      ...attributionProperties(),
+      ...properties,
+    };
+
+    debugLog("[trackEvent]", eventName, mergedProperties);
+    captureEvent(eventName, mergedProperties);
+
+    if (options.saveEventLog || TRACKED_EVENT_LOGS.has(eventName)) {
+      sendEventLog(eventName, mergedProperties);
+    }
+
+    // Future: add PostHog or Meta Pixel tracking here for custom event mapping.
+  }
+
+  function isMetaLeadTracked() {
+    try {
+      return sessionStorage.getItem(META_LEAD_SESSION_KEY) === "1";
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function setMetaLeadTracked() {
+    try {
+      sessionStorage.setItem(META_LEAD_SESSION_KEY, "1");
+    } catch (_) {
+      // Ignore storage failures.
     }
   }
 
@@ -405,11 +561,6 @@
     }
   }
 
-  function getSource() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('source') || params.get('utm_source') || 'direct';
-  }
-
   function answerText(answer) {
     return answer ? answer.label || answer.value || '' : '';
   }
@@ -451,7 +602,7 @@
       submitted_at: new Date().toISOString(),
       session_id: state.sessionId,
       attempt_id: createId(),
-      source: state.source,
+      ...attributionProperties(),
       q1_score: state.answers.q1?.score || null,
       q1_answer: answerText(state.answers.q1),
       q2_score: state.answers.q2?.score || null,
@@ -551,14 +702,14 @@
   function renderCheatCode(result) {
     const cheatCode = getCheatCode(result);
     return `<details class="cheat-card">
-      <summary>🎁 오늘의 AI 치트코드 보기</summary>
+      <summary data-event="cheatcode_opened">오늘의 AI 치트코드 보기</summary>
       <div class="cheat-content">
         <div class="cheat-heading">
           <strong>${escapeHtml(cheatCode.title)}</strong>
           <p>${escapeHtml(cheatCode.guide)}</p>
         </div>
         <pre class="cheat-prompt">${escapeHtml(cheatCode.prompt)}</pre>
-        <button class="copy-cheat-button" type="button" data-action="copy-cheat" data-event="cheat_code_copied">치트코드 복사하기</button>
+        <button class="copy-cheat-button" type="button" data-action="copy-cheat" data-event="cheatcode_copied">치트코드 복사하기</button>
       </div>
     </details>`;
   }
@@ -587,13 +738,14 @@
               <p>${escapeHtml(result.verdict)}</p>
             </div>
           </div>
-          <a class="save-card-button" href="${cardAsset.src}" download="${cardAsset.download}" data-event="result_card_downloaded">결과 카드 저장하기</a>
+          <a class="save-card-button" href="${cardAsset.src}" download="${cardAsset.download}" data-event="result_card_saved">결과 카드 저장하기</a>
           <div class="result-cta-panel">
-            <a class="btn-pixel cta-full result-primary-cta" href="${COACHING_URL}" target="_blank" rel="noopener noreferrer" data-event="kmong_cta_clicked">내 AI 업무 스킬 레벨업하기 →</a>
+            <a class="btn-pixel cta-full result-primary-cta" href="${COACHING_URL}" target="_blank" rel="noopener noreferrer" data-action="kmong-cta" data-event="kmong_cta_clicked">내 AI 업무 스킬 레벨업하기 →</a>
           </div>
           ${renderCheatCode(result)}
           ${renderBeforeAfter(result)}
           <div class="report-soft-area">
+            <button class="btn-pixel ghost cta-full" data-action="report" data-event="report_form_opened">맞춤 리포트 신청하기</button>
             <button class="btn-pixel ghost cta-full" data-action="restart">다시 풀기</button>
           </div>
         </div>
@@ -655,6 +807,10 @@
       session_id: state.resultPayload.session_id,
       attempt_id: state.resultPayload.attempt_id,
       source: state.resultPayload.source,
+      campaign: state.resultPayload.campaign || "",
+      adset: state.resultPayload.adset || "",
+      ad: state.resultPayload.ad || "",
+      creative: state.resultPayload.creative || "",
       nickname: String(form.get('nickname') || '').trim(),
       email,
       report_task: String(form.get('report_task') || '').trim(),
@@ -672,20 +828,38 @@
       task_tag: state.resultPayload.task_tag,
       consent,
     };
-    console.log('resultPayload', state.resultPayload);
-    console.log('reportRequestPayload', state.reportRequestPayload);
-    captureEvent('report_submitted', { source: state.source, result_level: state.resultPayload.result_level });
+    debugLog('[Tracking] resultPayload source:', state.resultPayload.source, state.resultPayload);
+    debugLog('[Tracking] reportRequestPayload source:', state.reportRequestPayload.source, state.reportRequestPayload);
+    trackEvent('report_submitted', {
+      result_level: state.resultPayload.result_level,
+      result_title: state.resultPayload.result_title,
+      total_score: state.resultPayload.total_score,
+      primary_offer_fit: state.resultPayload.primary_offer_fit,
+      task_tag: state.resultPayload.task_tag,
+    });
     sendToGoogleSheets(state.reportRequestPayload);
+    if (!isMetaLeadTracked()) {
+      trackMetaEvent('Lead', {
+        content_name: 'AI Work Survival Report Request',
+        source: state.resultPayload.source,
+      });
+      setMetaLeadTracked();
+    }
     renderReport(true, {});
   });
 
   root.addEventListener('click', async (event) => {
+    const eventTarget = event.target.closest('[data-event]');
     const target = event.target.closest('[data-action]');
+    if (eventTarget && !target) {
+      trackEvent(eventTarget.dataset.event);
+      return;
+    }
     if (!target) return;
     const action = target.dataset.action;
 
-    if (target.dataset.event) {
-      captureEvent(target.dataset.event, { source: state.source, question_index: state.index + 1 });
+    if (target.dataset.event && !['select', 'copy-cheat', 'kmong-cta'].includes(action)) {
+      trackEvent(target.dataset.event, { question_index: state.index + 1 });
     }
 
     if (action === 'start') {
@@ -698,6 +872,10 @@
       const cheatCode = getCheatCode(result);
       try {
         await copyText(cheatCode.prompt);
+        trackEvent(target.dataset.event || 'cheatcode_copied', {
+          result_level: result?.level || '',
+          result_title: result?.title || '',
+        });
         target.textContent = '복사 완료';
         target.disabled = true;
       } catch (error) {
@@ -711,6 +889,12 @@
       const option = q.options[Number(target.dataset.index)];
       if (!option) return;
       state.answers[q.id] = option;
+      trackEvent(target.dataset.event || `question_${state.index + 1}_answered`, {
+        question_id: q.id,
+        question_index: state.index + 1,
+        answer: option.label,
+        score: q.scored ? option.score : '',
+      });
       root.querySelectorAll('.choice').forEach((button) => {
         button.disabled = true;
         if (button !== target) button.classList.add('choice-muted');
@@ -725,10 +909,10 @@
           state.index += 1;
         } else {
           state.resultPayload = buildResultPayload();
-          console.log('resultPayload', state.resultPayload);
-          captureEvent('result_viewed', {
-            source: state.source,
+          debugLog('[Tracking] resultPayload source:', state.resultPayload.source, state.resultPayload);
+          trackEvent('result_viewed', {
             result_level: state.resultPayload.result_level,
+            result_title: state.resultPayload.result_title,
             total_score: state.resultPayload.total_score,
           });
           sendToGoogleSheets(state.resultPayload);
@@ -736,6 +920,17 @@
         }
         render();
       }, 180);
+      return;
+    }
+
+    if (action === 'kmong-cta') {
+      const payload = state.resultPayload || {};
+      trackEvent(target.dataset.event || 'kmong_cta_clicked', {
+        result_level: payload.result_level || '',
+        result_title: payload.result_title || '',
+        total_score: payload.total_score || '',
+        href: target.href,
+      });
       return;
     }
 
@@ -760,7 +955,10 @@
     render();
   });
 
-  window.AISurvivalApp = { QUESTIONS, RESULTS, buildResultPayload, getPrimaryOfferFit, getTaskTag };
-  captureEvent('page_view', { source: state.source });
+  window.AISurvivalApp = { QUESTIONS, RESULTS, buildResultPayload, getPrimaryOfferFit, getTaskTag, trackEvent, trackMetaEvent };
+  debugLog("[Tracking] source:", state.source);
+  loadMetaPixel();
+  trackMetaEvent("PageView");
+  trackEvent('page_view');
   render();
 }());

@@ -14,12 +14,17 @@ var SPREADSHEET_ID = "";
 
 var TEST_RESPONSE_SHEET_NAME = "test_responses";
 var REPORT_REQUEST_SHEET_NAME = "report_requests";
+var EVENT_LOG_SHEET_NAME = "event_logs";
 
 var TEST_RESPONSE_HEADERS = [
   "submitted_at",
   "session_id",
   "attempt_id",
   "source",
+  "campaign",
+  "adset",
+  "ad",
+  "creative",
   "q1_score",
   "q1_answer",
   "q2_score",
@@ -50,6 +55,10 @@ var REPORT_REQUEST_HEADERS = [
   "session_id",
   "attempt_id",
   "source",
+  "campaign",
+  "adset",
+  "ad",
+  "creative",
   "nickname",
   "email",
   "report_task",
@@ -66,6 +75,23 @@ var REPORT_REQUEST_HEADERS = [
   "primary_offer_fit",
   "task_tag",
   "consent"
+];
+
+var EVENT_LOG_HEADERS = [
+  "logged_at",
+  "session_id",
+  "attempt_id",
+  "event_name",
+  "source",
+  "campaign",
+  "adset",
+  "ad",
+  "creative",
+  "result_level",
+  "result_title",
+  "total_score",
+  "properties",
+  "user_agent"
 ];
 
 function doPost(e) {
@@ -89,6 +115,12 @@ function doPost(e) {
     } else if (payload.type === "report_request") {
       var reportSheetData = getOrCreateSheet_(spreadsheet, REPORT_REQUEST_SHEET_NAME, REPORT_REQUEST_HEADERS);
       appendPayload_(reportSheetData.sheet, reportSheetData.headers, payload);
+    } else if (payload.type === "event_log") {
+      if (!payload.logged_at) {
+        payload.logged_at = new Date().toISOString();
+      }
+      var eventSheetData = getOrCreateSheet_(spreadsheet, EVENT_LOG_SHEET_NAME, EVENT_LOG_HEADERS);
+      appendPayload_(eventSheetData.sheet, eventSheetData.headers, payload);
     } else {
       throw new Error("Unknown payload type: " + payload.type);
     }
