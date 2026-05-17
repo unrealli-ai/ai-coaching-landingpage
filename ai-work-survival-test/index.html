@@ -12,11 +12,32 @@
   <link rel="stylesheet" href="styles.css" />
   <script>
     window.META_PIXEL_ID = "2211846416311327";
+    if (window.META_PIXEL_ID && window.META_PIXEL_ID !== "YOUR_META_PIXEL_ID") {
+      !function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = true;
+        n.version = "2.0";
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = true;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+      }(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
+      window.fbq("init", window.META_PIXEL_ID);
+      window.fbq("track", "PageView");
+      window.META_PIXEL_PAGEVIEW_TRACKED = true;
+    }
   </script>
 </head>
 <body>
   <div id="root"></div>
 
-  <script src="app.js?v=e19fe5e"></script>
+  <script src="app.js?v=pageview-head"></script>
 </body>
 </html>

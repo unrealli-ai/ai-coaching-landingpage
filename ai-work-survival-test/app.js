@@ -957,7 +957,10 @@
   window.AISurvivalApp = { QUESTIONS, RESULTS, buildResultPayload, getPrimaryOfferFit, getTaskTag, trackEvent, trackMetaEvent };
   debugLog("[Tracking] source:", state.source);
   loadMetaPixel();
-  trackMetaEvent("PageView");
+  if (!window.META_PIXEL_PAGEVIEW_TRACKED) {
+    trackMetaEvent("PageView");
+    window.META_PIXEL_PAGEVIEW_TRACKED = true;
+  }
   trackEvent('page_view');
   render();
 }());
