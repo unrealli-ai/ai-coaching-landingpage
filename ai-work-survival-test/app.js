@@ -436,7 +436,6 @@
           ${renderCheatCode()}
           ${renderBeforeAfter(result)}
           <div class="report-soft-area">
-            <button class="report-card" data-action="report" data-event="report_form_opened"><span class="report-icon">R</span><span><strong>2페이지 맞춤 리포트 후보로 신청하기</strong><small>선택한 업무 기준으로 일부 분께만 개별 안내</small></span><b>+</b></button>
             <button class="btn-pixel ghost cta-full" data-action="restart">다시 풀기</button>
           </div>
         </div>
@@ -456,14 +455,14 @@
           ` : `
             <form id="report-form" novalidate>
               <span class="chip lav">OPTIONAL</span>
-              <h1>2페이지 맞춤 리포트 후보로 신청하기</h1>
+              <h1>맞춤 리포트 신청</h1>
               <p class="section-copy">원하면 결과 아래에서 추가 신청할 수 있어요. 메인 액션은 AI 업무 스킬 레벨업입니다.</p>
               <label class="field-group"><span>NICKNAME</span><input class="field" name="nickname" placeholder="원하는 닉네임"></label>
               <label class="field-group"><span>EMAIL</span><input class="field" name="email" type="email" placeholder="hello@example.com">${errors?.email ? `<em>${errors.email}</em>` : ''}</label>
               <label class="field-group"><span>줄이고 싶은 반복 업무</span><textarea class="field" name="report_task" rows="4" placeholder="예) 주간 리포트 취합 및 정리">${escapeHtml(defaultReportTask)}</textarea></label>
               <label class="consent-row"><input name="consent" type="checkbox"><span>개인정보 수집·이용에 동의합니다. 맞춤 리포트 후보 선정 및 결과 안내 목적으로만 사용합니다.</span></label>
               ${errors?.consent ? `<em class="form-error">${errors.consent}</em>` : ''}
-              <button class="btn-pixel cta-full" type="submit" data-event="report_submitted">후보로 신청하기 →</button>
+              <button class="btn-pixel cta-full" type="submit" data-event="report_submitted">신청하기 →</button>
             </form>
           `}
         </div>
@@ -539,21 +538,34 @@
     if (action === 'select') {
       const q = QUESTIONS[state.index];
       const option = q.options[Number(target.dataset.index)];
+      if (!option) return;
       state.answers[q.id] = option;
-
-      if (state.index < QUESTIONS.length - 1) {
-        state.index += 1;
-      } else {
-        state.resultPayload = buildResultPayload();
-        console.log('resultPayload', state.resultPayload);
-        captureEvent('result_viewed', {
-          source: state.source,
-          result_level: state.resultPayload.result_level,
-          total_score: state.resultPayload.total_score,
-        });
-        sendToGoogleSheets(state.resultPayload);
-        state.view = 'result';
+      root.querySelectorAll('.choice').forEach((button) => {
+        button.disabled = true;
+        if (button !== target) button.classList.add('choice-muted');
+      });
+      target.classList.add('selected');
+      if (!target.querySelector('.choice-check')) {
+        target.insertAdjacentHTML('beforeend', '<span class="choice-check" aria-hidden="true"></span>');
       }
+
+      window.setTimeout(() => {
+        if (state.index < QUESTIONS.length - 1) {
+          state.index += 1;
+        } else {
+          state.resultPayload = buildResultPayload();
+          console.log('resultPayload', state.resultPayload);
+          captureEvent('result_viewed', {
+            source: state.source,
+            result_level: state.resultPayload.result_level,
+            total_score: state.resultPayload.total_score,
+          });
+          sendToGoogleSheets(state.resultPayload);
+          state.view = 'result';
+        }
+        render();
+      }, 180);
+      return;
     }
 
     if (action === 'prev') {
