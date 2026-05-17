@@ -1247,20 +1247,21 @@ a {
   }
 
   .hero-layout {
-    gap: 14px;
+    gap: 18px;
   }
 
   .hero-copy h1 {
     font-size: clamp(30px, 8.2vw, 34px);
     line-height: 1.13;
-    margin-bottom: 8px;
+    margin-bottom: 14px;
   }
 
   .hero-ad {
     min-height: calc(100svh - 58px);
-    grid-template-rows: auto minmax(176px, 0.58fr) auto;
+    grid-template-rows: auto auto auto;
     align-content: center;
-    gap: clamp(12px, 2.5vh, 18px);
+    gap: clamp(20px, 3.2vh, 28px);
+    padding-bottom: 12px;
   }
 
   .hero-ad .title-line {
@@ -1273,8 +1274,10 @@ a {
   }
 
   .hero-cta {
-    width: 100%;
-    min-height: 66px;
+    width: calc(100% - 14px);
+    max-width: 342px;
+    min-height: 64px;
+    margin-top: -6px;
     font-size: 18px;
   }
 
@@ -1294,7 +1297,7 @@ a {
 
   .hero-ad .hero-scene.image-scene {
     width: min(100%, 342px);
-    min-height: clamp(176px, 27vh, 218px);
+    min-height: clamp(172px, 25vh, 206px);
   }
 
   .character-main-image {
