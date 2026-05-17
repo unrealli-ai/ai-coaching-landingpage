@@ -133,29 +133,6 @@
     ],
   };
 
-  const RESULT_CARD_META = {
-    1: {
-      skill: '검색 / 구경 / 가끔 질문',
-      next: '반복 업무 하나를 AI에게 물어보기',
-    },
-    2: {
-      skill: '질문하기 / 답변 복사',
-      next: '내 상황과 원하는 형식을 같이 말하기',
-    },
-    3: {
-      skill: '초안 생성 / 요약 / 정리',
-      next: '반복 질문 템플릿 1개 만들기',
-    },
-    4: {
-      skill: '자료 입력 / 결과 수정 / 반복 활용',
-      next: '업무별 프롬프트와 검수 기준 정리',
-    },
-    5: {
-      skill: '업무 구조화 / 반복 프로세스 설계',
-      next: '시트, 문서, 자동화를 하나의 흐름으로 연결',
-    },
-  };
-
   const BEFORE_AFTER_BY_LEVEL = {
     1: {
       title: 'AI에게 맡길 수 있는 일부터 찾아보세요',
@@ -428,27 +405,31 @@
     </details>`;
   }
 
+  function getFinalCardAsset(level) {
+    const safeLevel = Number(level) >= 1 && Number(level) <= 5 ? Number(level) : 3;
+    return {
+      level: safeLevel,
+      src: `assets/final-level-${safeLevel}.png`,
+      download: `unrealli-ai-survival-level-${safeLevel}.png`,
+    };
+  }
+
   function renderResult() {
     const payload = state.resultPayload;
     const result = resultByScore(payload.total_score);
-    const cardMeta = RESULT_CARD_META[result.level] || RESULT_CARD_META[1];
+    const cardAsset = getFinalCardAsset(result.level);
     root.innerHTML = shell(`
       <section class="result-layout result-focused" id="preview-result" data-event="result_viewed">
         <div class="result-main pixel-card">
-          <div class="survival-card">
-            <div class="survival-card-copy">
+          <div class="final-card-frame">
+            <img class="final-result-card-image" src="${cardAsset.src}" alt="AI 업무 생존력 카드 LV.${String(cardAsset.level).padStart(2, '0')} ${escapeHtml(result.title)}" loading="eager" decoding="async" onerror="this.hidden=true; this.nextElementSibling.hidden=false;">
+            <div class="card-image-fallback" hidden>
               <div class="eyebrow">AI 업무 생존력 카드</div>
-              <div class="lvl-num">LV.${String(result.level).padStart(2, '0')}</div>
-              <h2>${escapeHtml(result.title)}</h2>
-              <p class="card-verdict">${escapeHtml(result.verdict)}</p>
-              <div class="card-stats">
-                <div><span>현재 스킬</span><strong>${escapeHtml(cardMeta.skill)}</strong></div>
-                <div><span>다음 레벨 조건</span><strong>${escapeHtml(cardMeta.next)}</strong></div>
-              </div>
+              <strong>LV.${String(result.level).padStart(2, '0')} ${escapeHtml(result.title)}</strong>
+              <p>${escapeHtml(result.verdict)}</p>
             </div>
-            <div class="card-character"><img src="assets/result-card-level-${result.level}.png" alt="LV.${String(result.level).padStart(2, '0')} ${escapeHtml(result.title)} 결과 카드 이미지"></div>
           </div>
-          <p class="capture-note">📸 이 카드는 캡처해두세요</p>
+          <a class="save-card-button" href="${cardAsset.src}" download="${cardAsset.download}" data-event="result_card_downloaded">결과 카드 저장하기</a>
           <div class="result-cta-panel">
             <a class="btn-pixel cta-full result-primary-cta" href="${COACHING_URL}" target="_blank" rel="noopener noreferrer" data-event="kmong_cta_clicked">내 AI 업무 스킬 레벨업하기 →</a>
           </div>
