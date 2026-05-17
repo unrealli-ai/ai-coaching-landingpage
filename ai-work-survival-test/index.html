@@ -32,12 +32,22 @@
       window.fbq("init", window.META_PIXEL_ID);
       window.fbq("track", "PageView");
       window.META_PIXEL_PAGEVIEW_TRACKED = true;
+      window.setTimeout(function () {
+        if (window.META_PIXEL_IMAGE_FALLBACK_TRACKED) return;
+        var img = new Image();
+        img.width = 1;
+        img.height = 1;
+        img.style.display = "none";
+        img.src = "https://www.facebook.com/tr?id=" + encodeURIComponent(window.META_PIXEL_ID) + "&ev=PageView&noscript=1";
+        document.body.appendChild(img);
+        window.META_PIXEL_IMAGE_FALLBACK_TRACKED = true;
+      }, 1500);
     }
   </script>
 </head>
 <body>
   <div id="root"></div>
 
-  <script src="app.js?v=pageview-head"></script>
+  <script src="app.js?v=pageview-fallback"></script>
 </body>
 </html>
