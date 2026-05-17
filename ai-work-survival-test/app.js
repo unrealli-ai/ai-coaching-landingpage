@@ -410,7 +410,7 @@
     return {
       level: safeLevel,
       src: `assets/final-level-${safeLevel}.png`,
-      download: `unrealli-ai-survival-level-${safeLevel}.png`,
+      download: `ai-work-survival-card-level-${safeLevel}.png`,
     };
   }
 
